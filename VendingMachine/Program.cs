@@ -6,6 +6,7 @@ using System.Text;
 using VendingMachine.Interfaces;
 using VendingMachine.Models;
 using VendingMachine.Repositories;
+using VendingMachine.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<VendingMachineDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("default")));
-builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+//builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddTransient<IUnitOfWork ,  UnitOfWork >();
 
 //Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(options => //Identity
