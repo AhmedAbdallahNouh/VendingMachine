@@ -17,6 +17,8 @@ namespace VendingMachine.UnitOfWork
         public IBaseRepository<Product> Product  {get; private set;}
 		public IBaseRepository<AppUser> User { get; private set; }
 
+		public IBaseRepository<BuyerProduct> BuyerProduct { get; private set; }
+
 		public int Complete()
 		{
 			return _context.SaveChanges();

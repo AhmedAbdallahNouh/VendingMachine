@@ -1,4 +1,5 @@
-﻿using VendingMachine.Interfaces;
+﻿using VendingMachine.DTOs;
+using VendingMachine.Interfaces;
 using VendingMachine.Models;
 
 namespace VendingMachine.Services
@@ -21,7 +22,11 @@ namespace VendingMachine.Services
 		public Product? GetByName(string name) => _unitOfWork.Product.Find(p => p.Name == name);
 		public Product? GetByNameForSpeicficSeller(string sellerId, string name) => _unitOfWork.Product.Find(p =>p.SellerId == sellerId &&  p.Name == name);
 		public Product? GetBySellerId(string sellerId) => _unitOfWork.Product.Find(p => p.SellerId == sellerId);
-		public Product? Add(ProductDTO) => _unitOfWork.Product.Add(p => p.SellerId == sellerId);
+		public Product? Add(ProductDTO productDTO) 
+		{
+			_unitOfWork.Product.Add(p => p.SellerId == sellerId);
+		}
+
 		public Product? Update(string sellerId) => _unitOfWork.Product.Find(p => p.SellerId == sellerId);
 		public Product? Delete(string sellerId) => _unitOfWork.Product.Find(p => p.SellerId == sellerId);
 
