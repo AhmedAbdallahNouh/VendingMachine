@@ -12,10 +12,11 @@ using Microsoft.EntityFrameworkCore;
 using VendingMachine.Mapping;
 using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.DTOs;
+using VendingMachine.Interfaces;
 
 namespace VendingMachine.Services
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
 	{
 		private readonly UserManager<AppUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
@@ -25,45 +26,46 @@ namespace VendingMachine.Services
 			_userManager = userManager;
 			_roleManager = roleManager;
 		}
-		public async Task<List<AppUserDTO>> GetAll()
+		public async Task<List<IAppUserDTO>> GetAll()
 		{
 			List<AppUser> users = await _userManager.Users.ToListAsync();
 
-			return users.Count != 0 ? UserMapper.MapToUserDTOs(users) : new List<AppUserDTO>();
+			return users.Count != 0 ? UserMapper.MapToUserDTOs(users) : new List<IAppUserDTO>();
 		}
 
-		public async Task<List<AppUserDTO>> GetAllByRole(string roleName)
+		public async Task<List<IAppUserDTO>> GetAllByRole(string roleName)
 		{
 			List<AppUser> users = (List<AppUser>)await _userManager.GetUsersInRoleAsync(roleName);
 
-			return users.Count != 0 ? UserMapper.MapToUserDTOs(users) : new List<AppUserDTO>();
+			return users.Count != 0 ? UserMapper.MapToUserDTOs(users) : new List<IAppUserDTO>();
 		}
 
-		public async Task<AppUserDTO?> GetById(string userId)
+		public async Task<IAppUserDTO?> GetById(string userId)
 		{
 			AppUser? user = await _userManager.FindByIdAsync(userId);
 
 			return user is not null ? UserMapper.MapToUserDTO(user) : null;
 		}
-		public async Task<AppUserDTO?> GetByName(string userName)
+		public async Task<IAppUserDTO?> GetByName(string userName)
 		{
 			AppUser? user = await _userManager.FindByNameAsync(userName);
 
 			return user is not null ? UserMapper.MapToUserDTO(user) : null;
 		}
-		public async Task<AppUserDTO?> Registrater(RegistrationUserDTO registrationUserDTO)
+		public async Task<IAppUserDTO?> Registrater(RegistrationUserDTO registrationUserDTO)
 		{
 			if (registrationUserDTO is not null)
 			{
-				AppUser user = UserMapper.MapToUser(registrationUserDTO)!;
+				AppUser user = UserMapper.MapToRegistrationUser(registrationUserDTO)!;
 
 				IdentityResult addUserResult = await _userManager.CreateAsync(user, registrationUserDTO.Password);
-				IdentityResult addRoleResult = await _roleManager.CreateAsync(new IdentityRole("Seller"));
-				IdentityResult addRoleToUserResult = await _userManager.AddToRoleAsync(user, "Seller");
+				IdentityResult addRoleResult = await _roleManager.CreateAsync(new IdentityRole("Buyer"));
+				IdentityResult addRoleToUserResult = await _userManager.AddToRoleAsync(user, registrationUserDTO.Role);
 				if (addUserResult != null)
 				{
-					registrationUserDTO.Id = user.Id;
-					return UserMapper.MapToUserDTO(user)!;
+					var userDTO = 	UserMapper.MapToUserDTO(user, registrationUserDTO.Role)!;
+					userDTO.Role = registrationUserDTO.Role;
+					return userDTO;
 				}
 				return null;
 			}
@@ -104,7 +106,7 @@ namespace VendingMachine.Services
 
 			return await _userManager.DeleteAsync(user);
 		}
-
+	
 		//public async Task<ActionResult> Login(LoginDTO loginDTO)
 		//{
 		//	AppUser? user = await _userManager.FindByEmailAsync(loginDTO.Email);

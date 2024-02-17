@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VendingMachine.DTOs.UserDTOs;
+using VendingMachine.Filters;
 using VendingMachine.Interfaces;
 using VendingMachine.Mapping;
 using VendingMachine.Models;
-using VendingMachine.Services;
 
 namespace VendingMachine.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class UserController : ControllerBase
 	{
@@ -23,17 +24,18 @@ namespace VendingMachine.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetAll() 
 		{
-			List<AppUserDTO> appUserDTOs =  await _userService.GetAll();
+			List<IAppUserDTO> appUserDTOs =  await _userService.GetAll();
 
 			if (!appUserDTOs.Any())
 				return NotFound();
 
 			return Ok(appUserDTOs);
 		}
-		[HttpGet("GetAll/{role:alpha}")]
+
+		[HttpGet("GetAll/{roleName:alpha}")]
 		public async Task<IActionResult> GetAllByRole(string roleName)
 		{
-			List<AppUserDTO> appUserDTOs = await _userService.GetAllByRole(roleName);
+			List<IAppUserDTO> appUserDTOs = await _userService.GetAllByRole(roleName);
 
 			if (!appUserDTOs.Any())
 				return NotFound();
@@ -41,20 +43,21 @@ namespace VendingMachine.Controllers
 			return Ok(appUserDTOs);
 		}
 
-		[HttpGet("{id:alpha}")]
+		[HttpGet("{userId:alpha}")]
 		public async Task<IActionResult> GetById(string userId)
 		{
-			AppUserDTO? appUserDTO = await _userService.GetById(userId);
+			IAppUserDTO? appUserDTO = await _userService.GetById(userId);
 
 			if (appUserDTO == null)
 				return NotFound();
 
 			return Ok(appUserDTO);
 		}
+
 		[HttpGet("GetByUserName/{userName:alpha}")]
 		public async Task<IActionResult> GetByUserName(string userName)
 		{
-			AppUserDTO? appUserDTO = await _userService.GetByName(userName);
+			IAppUserDTO? appUserDTO = await _userService.GetByName(userName);
 
 			if (appUserDTO == null)
 				return NotFound();
@@ -63,11 +66,11 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> Registrater(RegistrationUserDTO registrationUserDTO)
+		public async Task<ActionResult> Add(RegistrationUserDTO registrationUserDTO)
 		{
 			if (ModelState.IsValid)
 			{				
-				AppUserDTO? userDTO = await _userService.Registrater(registrationUserDTO);				
+				IAppUserDTO? userDTO = await _userService.Registrater(registrationUserDTO);				
 				
 				if(userDTO == null)
 					return UnprocessableEntity("Unable to process the request to add the user.");
@@ -78,6 +81,8 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpPut]
+		[Authorize(Roles ="Seller")]
+		[TypeFilter(typeof(UserAuthorizationFilter))]
 		public async Task<ActionResult> Update(string userId,AppUserDTO userDTO, string newPassword)
 		{
 			if (ModelState.IsValid)
@@ -93,6 +98,7 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpDelete]
+		[TypeFilter(typeof(UserAuthorizationFilter))]
 		public async Task<ActionResult> Delete(string userId)
 		{
 			if (ModelState.IsValid)

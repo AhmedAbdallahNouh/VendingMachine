@@ -19,7 +19,7 @@ namespace VendingMachine.DTOs
 		public decimal Cost { get; set; }
 
 		public string SellerId { get; set; }
-		public AppUserDTO? Seller { get; set; }
+		public SellerDTO? SellerDTO { get; set; }
 		public ICollection<BuyerProductDTO> BuyerProducts { get; set; }
 	}
 }

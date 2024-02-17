@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using VendingMachine.DTOs.UserDTOs;
+﻿using VendingMachine.DTOs.UserDTOs;
+
+using System.ComponentModel.DataAnnotations.Schema;
 using VendingMachine.Models;
 
 namespace VendingMachine.DTOs
@@ -9,7 +10,7 @@ namespace VendingMachine.DTOs
 		public int ProductId { get; set; }
 		public string BuyerId { get; set; }
 		public int Quantity { get; set; }
-		public AppUserDTO? BuyerDTO { get; set; }
+		public BuyerDTO? BuyerDTO { get; set; }
 		public ProductDTO? ProductDTO { get; set; }
 	}
 }

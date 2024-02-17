@@ -1,4 +1,5 @@
 ﻿using VendingMachine.DTOs;
+using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.Models;
 
 namespace VendingMachine.Mapping
@@ -17,7 +18,7 @@ namespace VendingMachine.Mapping
 					AmountAvailable = product.AmountAvailable,
 					Cost = product.Cost,
 					SellerId = product.SellerId,
-					Seller = product.Seller is not null ? UserMapper.MapToUserDTO(product.Seller) : null,
+					SellerDTO = (SellerDTO)(product.Seller is not null ? UserMapper.MapToUserDTO(product.Seller, "Seller") : null),
 
 				};
 				return ProductDTO;
@@ -36,7 +37,7 @@ namespace VendingMachine.Mapping
 					AmountAvailable = productDTO.AmountAvailable,
 					Cost = productDTO.Cost,
 					SellerId = productDTO.SellerId,
-					Seller = productDTO.Seller is not null ? UserMapper.MapToUser(productDTO.Seller) : null,
+					Seller = productDTO.SellerDTO is not null ? UserMapper.MapToUser(productDTO.SellerDTO) : null,
 					//KeyDTOs = Product.Keys.Select(k => MapKeyToDto(k)).ToList()
 				};
 				return Product;

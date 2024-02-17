@@ -3,7 +3,7 @@ using VendingMachine.Models;
 
 namespace VendingMachine.Interfaces
 {
-    public interface IProductServices
+    public interface IProductService
     {
         ProductDTO? Add(ProductDTO productDTO);
         int Delete(string sellerId, int productDtoId);
@@ -19,6 +19,8 @@ namespace VendingMachine.Interfaces
         ProductDTO? GetByName(string name);
         Task<ProductDTO?> GetByNameAsync(string name);
         ProductDTO? GetByNameForSpeicficSeller(string sellerId, string name);
-        int Update(string sellerId, ProductDTO productDTO);
+        public bool IsSellerAuthorized(string sellerId, int productId);
+
+		int Update(string sellerId, ProductDTO productDTO);
     }
 }

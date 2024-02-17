@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.Interfaces;
 using VendingMachine.Models;
 using VendingMachine.Repositories;
@@ -22,8 +23,10 @@ builder.Services.AddDbContext<VendingMachineDbContext>(option => option.UseSqlSe
 //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddTransient<IUnitOfWork ,  UnitOfWork >();
-builder.Services.AddScoped<IProductServices ,  ProductService >();
+builder.Services.AddScoped<IProductService ,  ProductService >();
 builder.Services.AddScoped<IUserService ,  UserService >();
+builder.Services.AddScoped<IAppUserDTO ,  AppUserDTO >();
+builder.Services.AddScoped<IAuthenticationService,  AuthenticationService >();
 
 
 //Identity

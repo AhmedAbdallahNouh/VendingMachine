@@ -14,7 +14,7 @@ namespace VendingMachine.Mapping
 					BuyerId = buyerProduct.BuyerId,
 					ProductId = buyerProduct.ProductId!,
 					Quantity = buyerProduct.Quantity,
-					BuyerDTO = buyerProduct.Buyer is not null ? UserMapper.MapToUserDTO(buyerProduct.Buyer) : null,
+					//BuyerDTO = buyerProduct.Buyer is not null ? UserMapper.MapToUserDTO(buyerProduct.Buyer) : null,
 					ProductDTO = buyerProduct.Product is not null ? ProductMapper.MapToProductDTO(buyerProduct.Product) : null,
 				};
 				return buyerProductDTO;

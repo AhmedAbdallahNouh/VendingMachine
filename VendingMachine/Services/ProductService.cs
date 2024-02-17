@@ -6,7 +6,7 @@ using VendingMachine.UnitOfWork;
 
 namespace VendingMachine.Services
 {
-    public class ProductService : IProductServices
+    public class ProductService : IProductService
 	{
 		private readonly IUnitOfWork _unitOfWork;
 
@@ -30,6 +30,7 @@ namespace VendingMachine.Services
 
 			return new List<ProductDTO>();
 		}
+
 		public IEnumerable<ProductDTO> GetAllAvailable()
 		{
 			IEnumerable<Product>? products = _unitOfWork.Product.FindAll(p => p.AmountAvailable > 0);
@@ -109,6 +110,13 @@ namespace VendingMachine.Services
 				ProductMapper.MapToProductDTO(product);
 
 			return null;
+		}
+
+		public bool IsSellerAuthorized(string sellerId, int productId)
+		{
+			ProductDTO? productDTO  = GetById(productId);
+			return (productDTO is not null || productDTO!.SellerId == sellerId) ? true : false;
+					
 		}
 		public ProductDTO? Add(ProductDTO productDTO)
 		{

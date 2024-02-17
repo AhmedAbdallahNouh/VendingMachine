@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VendingMachine.Consts;
 using VendingMachine.DTOs;
+using VendingMachine.Filters;
 using VendingMachine.Interfaces;
 using VendingMachine.Models;
 using VendingMachine.Services;
@@ -12,16 +14,15 @@ namespace VendingMachine.Controllers
 	[ApiController]
 	public class ProductController : ControllerBase
 	{
-		private readonly IProductServices _productServices;
+		private readonly IProductService _productServices;
 
-		public ProductController(IProductServices productServices)
+		public ProductController(IProductService productServices)
 		{
 			_productServices = productServices;
 		}
 
 
 		[HttpGet]
-		//[Route("api/products")]
 		public IActionResult GetAll()
 		{
 			List<ProductDTO> productDTOs = _productServices.GetAll().ToList();
@@ -33,7 +34,6 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpGet("GetAllForSeller")]
-		//[Route("api/products/seller")]
 		public async Task<IActionResult> GetAllGetAllAsync()
 		{
 			var productDTOs = await _productServices.GetAllAsync();
@@ -45,7 +45,6 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpGet("GetAllAvailable")]
-		//[Route("api/products/available")]
 		public IActionResult GetAllAvailable()
 		{
 			List<ProductDTO> productDTOs = _productServices.GetAllAvailable().ToList();
@@ -57,7 +56,6 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpGet("GetAllNotAvailable")]
-		//[Route("api/products/notavailable")]
 		public IActionResult GetAllNotAvaliable()
 		{
 			List<ProductDTO> productDTOs = _productServices.GetAllNotAvaliable().ToList();
@@ -153,6 +151,9 @@ namespace VendingMachine.Controllers
 			return Ok(addedProduct);
 		}
 
+
+		[Authorize(Roles ="Seller")]
+		[TypeFilter(typeof(SellerAuthorizationFilter))]
 		[HttpPut("Edit/{id:alpha}")]
 		public IActionResult Update(string sellerId,[FromBody] ProductDTO productDTO)
 		{
@@ -166,6 +167,10 @@ namespace VendingMachine.Controllers
 
 			return NoContent();
 		}
+
+
+		[Authorize(Roles = "Seller")]
+		[TypeFilter(typeof(SellerAuthorizationFilter))]
 		[HttpPut("Delete/{id:alpha}/{sellerId:alpha}")]
 		public IActionResult Delete(string sellerId, int productId)
 		{

@@ -1,77 +1,121 @@
 ﻿using VendingMachine.DTOs;
 using VendingMachine.DTOs.UserDTOs;
+using VendingMachine.Interfaces;
 using VendingMachine.Models;
 
 namespace VendingMachine.Mapping
 {
     public static class UserMapper
 	{
-		public static AppUserDTO? MapToUserDTO(AppUser user)
+		public static IAppUserDTO? MapToUserDTO(AppUser user, string role = "")
 		{
 			if(user is not null)
 			{
-				AppUserDTO appUserDTO = new AppUserDTO()
+				//if(user.UserRoles.FirstOrDefault(r=> r.))
+				if (string.IsNullOrWhiteSpace(role))
+					return new AppUserDTO()
+					{
+						Id = user.Id,
+						Role = role,
+						UserName = user.UserName,
+					};
+				if(role == "Seller")
 				{
-					Id = user.Id,
-					UserName = user.UserName!,
-					Deposit = user.Deposit,
-					SellerProductsDTOs = user.SellerProducts?.Count> 0 ? ProductMapper.MapToProductDTOs(user.SellerProducts.ToList()) : new List<ProductDTO>(),
-					//Seller = user.Seller,
-					//KeyDTOs = AppUser.Keys.Select(k => MapKeyToDto(k)).ToList()
+					SellerDTO sellerDTO = new SellerDTO()
+					{
+						Id = user.Id,
+						UserName = user.UserName!,
+						SellerProductsDTOs = user.SellerProducts?.Count > 0 ? ProductMapper.MapToProductDTOs(user.SellerProducts.ToList()) : new List<ProductDTO>(),
+					};
+					return sellerDTO;
+				}
+				if(role == "Buyer")
+				{
+					BuyerDTO buyerDTO = new BuyerDTO()
+					{
+						Id = user.Id,
+						UserName = user.UserName!,
+						Deposit = user.Deposit,
+						BuyerProductDTOs = user.BuyerProducts?.Count > 0 ? user.BuyerProducts.Select(bp => 
+											new BuyerProductDTO() { ProductId = bp.ProductId, BuyerId = bp.BuyerId, }).ToList() : new List<BuyerProductDTO>(),
+					};
 
-				};
-				return appUserDTO;
+					return buyerDTO;
+				}
+				return null;
 			}
 			return null;
 			
 		}
-		public static AppUser? MapToUser(BaseUserDTO userDTO)
+		public static AppUser? MapToUser(IAppUserDTO userDTO)
 		{
 			if(userDTO is not null)
 			{
-				if (userDTO is AppUserDTO appUserDTO)
+				if (userDTO is SellerDTO sellerDTO)
 				{
 					AppUser user = new AppUser()
 					{
-						Id = appUserDTO.Id,
-						UserName = appUserDTO.UserName,
-						Deposit = appUserDTO.Deposit,
-						SellerProducts = appUserDTO.SellerProductsDTOs?.Count > 0 ? ProductMapper.MapToProducts(appUserDTO.SellerProductsDTOs.ToList()) : new List<Product>(),
+						Id = sellerDTO.Id,
+						UserName = sellerDTO.UserName,
+						SellerProducts = sellerDTO.SellerProductsDTOs?.Count > 0 ? ProductMapper.MapToProducts(sellerDTO.SellerProductsDTOs.ToList()) : new List<Product>(),
 					};
 					return user;
 				}
-				else if (userDTO is RegistrationUserDTO registrationUserDTO)
+				if (userDTO is BuyerDTO buyerDTO)
 				{
 					AppUser user = new AppUser()
 					{
-						Id = registrationUserDTO.Id,
-						UserName = registrationUserDTO.UserName,
-						Deposit = registrationUserDTO.Deposit,
+						Id = buyerDTO.Id,
+						UserName = buyerDTO.UserName,
+						BuyerProducts = buyerDTO.BuyerProductDTOs?.Count > 0 ? buyerDTO.BuyerProductDTOs.Select(bp =>
+																	new BuyerProduct() { ProductId = bp.ProductId, BuyerId = bp.BuyerId, }).ToList() : new List<BuyerProduct>(),
 					};
 					return user;
 				}
-				
+				//if (userDTO is RegistrationUserDTO registrationUserDTO)
+				//{
+				//	AppUser user = new AppUser()
+				//	{
+				//		UserName = registrationUserDTO.UserName,
+				//	};
+				//	return user;
+				//}
+
 			}
 			return null;
 			
 		}
-		public static List<AppUserDTO> MapToUserDTOs(List<AppUser> users)
+		public static AppUser? MapToRegistrationUser(RegistrationUserDTO registrationUserDTO)
+		{
+			if (registrationUserDTO is not null)
+			{	
+					AppUser user = new AppUser()
+					{
+						UserName = registrationUserDTO.UserName,
+					};
+					return user;		
+			}
+			return null;
+
+		}
+
+		public static List<IAppUserDTO> MapToUserDTOs(List<AppUser> users , string role = "")
 		{
 			if(users.Any())
 			{
-				List<AppUserDTO> userDTOs = users.Select(user => MapToUserDTO(user)).ToList();
+				List<IAppUserDTO> userDTOs = users.Select(user => MapToUserDTO(user,role)).ToList();
 				return userDTOs;
 			}
-			return new List<AppUserDTO>();
+			return new List<IAppUserDTO>();
 		}
-		public static List<AppUser> MapToUsers(List<BaseUserDTO> userDTOs)
+		public static List<AppUser?> MapToUsers(List<IAppUserDTO> userDTOs)
 		{
 			if (userDTOs.Any())
 			{
-				List<AppUser> users = userDTOs.Select(userDTO => MapToUser(userDTO)).ToList();
+				List<AppUser?> users = userDTOs.Select(userDTO => MapToUser(userDTO)).ToList();
 				return users;
 			}
-			return new List<AppUser>();			
+			return new List<AppUser?>();			
 		}
 	}
 }
