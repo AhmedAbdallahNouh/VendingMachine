@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VendingMachine.Consts;
+using VendingMachine.DTOs;
 using VendingMachine.Interfaces;
+using VendingMachine.Models;
+using VendingMachine.Services;
 
 namespace VendingMachine.Controllers
 {
@@ -9,51 +12,172 @@ namespace VendingMachine.Controllers
 	[ApiController]
 	public class ProductController : ControllerBase
 	{
-		private readonly IBaseRepository<ProductController> _productRepository;
+		private readonly IProductServices _productServices;
 
-		private readonly IUnitOfWork _unitOfWork;
-
-		public ProductController(IUnitOfWork unitOfWork)
+		public ProductController(IProductServices productServices)
 		{
-			_unitOfWork = unitOfWork;
+			_productServices = productServices;
 		}
+
 
 		[HttpGet]
-		public IActionResult GetById()
-		{
-			return Ok(_unitOfWork.Product.GetById(1));
-		}
-
-		[HttpGet("GetAll")]
+		//[Route("api/products")]
 		public IActionResult GetAll()
 		{
-			return Ok(_unitOfWork.Product.GetAll());
+			List<ProductDTO> productDTOs = _productServices.GetAll().ToList();
+			
+			if (productDTOs.Count == 0) 
+				return NotFound();
+
+			return Ok(productDTOs);
 		}
 
-		[HttpGet("GetByName")]
-		public IActionResult GetByName()
+		[HttpGet("GetAllForSeller")]
+		//[Route("api/products/seller")]
+		public async Task<IActionResult> GetAllGetAllAsync()
 		{
-			return Ok(_unitOfWork.Books.Find(b => b.Title == "New Book", new[] { "Author" }));
+			var productDTOs = await _productServices.GetAllAsync();
+
+			if (productDTOs.Count() == 0)
+				return NotFound();
+
+			return Ok(productDTOs.ToList());
 		}
 
-		[HttpGet("GetAllWithAuthors")]
-		public IActionResult GetAllWithAuthors()
+		[HttpGet("GetAllAvailable")]
+		//[Route("api/products/available")]
+		public IActionResult GetAllAvailable()
 		{
-			return Ok(_unitOfWork.Books.FindAll(b => b.Title.Contains("New Book"), new[] { "Author" }));
+			List<ProductDTO> productDTOs = _productServices.GetAllAvailable().ToList();
+
+			if (productDTOs.Count == 0)
+				return NotFound();
+
+			return Ok(productDTOs);
 		}
 
-		[HttpGet("GetOrdered")]
-		public IActionResult GetOrdered()
+		[HttpGet("GetAllNotAvailable")]
+		//[Route("api/products/notavailable")]
+		public IActionResult GetAllNotAvaliable()
 		{
-			return Ok(_unitOfWork.Books.FindAll(b => b.Title.Contains("New Book"), null, null, b => b.Id, OrderBy.Descending));
+			List<ProductDTO> productDTOs = _productServices.GetAllNotAvaliable().ToList();
+
+			if (productDTOs.Count == 0)
+				return NotFound();
+
+			return Ok(productDTOs);
 		}
 
-		[HttpPost("AddOne")]
-		public IActionResult AddOne()
+		[HttpGet("GetAllAvailableForSpecificSeller/{id:alpha}")]
+		//[Route("api/products/seller/available")]
+		public IActionResult GetAllAvailableForSpecificUser(string sellerId)
 		{
-			var book = _unitOfWork.Books.Add(new Book { Title = "Test 4", AuthorId = 1 });
-			_unitOfWork.Complete();
-			return Ok(book);
+			List<ProductDTO> productDTOs = _productServices.GetAllForSpecificSeller(sellerId).ToList();
+
+			if (productDTOs.Count == 0)
+				return NotFound();
+
+			return Ok(productDTOs);
+		}
+
+		[HttpGet("GetAllNotAvailableForSpecificSeller/{id:alpha}")]
+		//[Route("api/products/seller/notavailable")]
+		public IActionResult GetAllNotAvaliableForSpecificUser(string sellerId)
+		{
+			List<ProductDTO> productDTOs = _productServices.GetAllNotAvaliableForSpecificUser(sellerId).ToList();
+
+			if (productDTOs.Count == 0)
+				return NotFound();
+
+			return Ok(productDTOs);
+		}
+
+		[HttpGet("GetById/{id :int}")]
+		//[Route("api/product/id")]
+		public IActionResult GetById(int productId)
+		{
+			ProductDTO? productDTO = _productServices.GetById(productId);
+
+			if (productDTO is null)
+				return NotFound();
+
+			return Ok(productDTO);
+		}
+		
+		[HttpGet("GetByIdAscync/{id:int}")]
+		//[Route("api/product/task")]
+		public async Task<IActionResult> GetByIdAsync(int productId)
+		{
+			ProductDTO? productDTO = await _productServices.GetByIdAsync(productId);
+
+			if (productDTO is null)
+				return NotFound();
+
+			return Ok(productDTO);
+		}
+
+
+		[HttpGet("GetByName/{name:alpha}")]
+		public IActionResult GetByName(string productName)
+		{
+			ProductDTO? productDTO =  _productServices.GetByName(productName);
+
+			if (productDTO is null)
+				return NotFound();
+
+			return Ok(productDTO);
+		}
+
+		[HttpGet("GetByNameAsync/{name:alpha}")]
+		public async Task<IActionResult> GetByNameAsync(string productName)
+		{
+			ProductDTO? productDTO = await _productServices.GetByNameAsync(productName);
+
+			if (productDTO is null)
+				return NotFound();
+
+			return Ok(productDTO);
+		}
+		
+		[HttpPost("Add")]
+		public IActionResult Add([FromBody] ProductDTO productDTO)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			ProductDTO? addedProduct = _productServices.Add(productDTO);
+			
+			if (addedProduct is null)
+				return UnprocessableEntity("Unable to process the request to add the product.");
+
+			return Ok(addedProduct);
+		}
+
+		[HttpPut("Edit/{id:alpha}")]
+		public IActionResult Update(string sellerId,[FromBody] ProductDTO productDTO)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			int numberOfRowsAffected = _productServices.Update(sellerId,productDTO);
+
+			if (numberOfRowsAffected <= 0)
+				return UnprocessableEntity("Unable to process the request to add the product.");
+
+			return NoContent();
+		}
+		[HttpPut("Delete/{id:alpha}/{sellerId:alpha}")]
+		public IActionResult Delete(string sellerId, int productId)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			int numberOfRowsAffected = _productServices.Delete(sellerId, productId);
+
+			if (numberOfRowsAffected <= 0)
+				return UnprocessableEntity("Unable to process the request to add the product.");
+
+			return NoContent();
 		}
 	}
 }

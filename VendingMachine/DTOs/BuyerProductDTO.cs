@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.Models;
 
 namespace VendingMachine.DTOs
 {
-	public class BuyerProductDTO
+    public class BuyerProductDTO
 	{
 		public int ProductId { get; set; }
 		public string BuyerId { get; set; }
