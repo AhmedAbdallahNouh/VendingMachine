@@ -21,6 +21,6 @@ namespace VendingMachine.Interfaces
         ProductDTO? GetByNameForSpeicficSeller(string sellerId, string name);
         public bool IsSellerAuthorized(string sellerId, int productId);
 
-		int Update(string sellerId, ProductDTO productDTO);
+		int Update(ProductDTO productDTO);
     }
 }

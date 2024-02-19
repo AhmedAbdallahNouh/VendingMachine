@@ -20,6 +20,6 @@ namespace VendingMachine.DTOs
 
 		public string SellerId { get; set; }
 		public SellerDTO? SellerDTO { get; set; }
-		public ICollection<BuyerProductDTO> BuyerProducts { get; set; }
+		public ICollection<BuyerProductDTO>? BuyerProducts { get; set; }
 	}
 }

@@ -55,7 +55,7 @@ namespace VendingMachine.Repositories
 
 		public async Task<T?> GetByIdAsync(int id, string[] includes = null) => await _context.Set<T>().FindAsync(id);
 
-		public T? Find(Expression<Func<T, bool>> criteria, string[] includes = null) => _context.Set<T>().SingleOrDefault(criteria);
+		public T? Find(Expression<Func<T, bool>> criteria, string[] includes = null) => _context.Set<T>().AsNoTracking().SingleOrDefault(criteria);
 
 		public IEnumerable<T>? FindAll(Expression<Func<T, bool>> criteria) => _context.Set<T>().Where(criteria).ToList();
 		public IEnumerable<T>? FindAll(Expression<Func<T, bool>> criteria, string[] includes = null)
@@ -132,6 +132,10 @@ namespace VendingMachine.Repositories
 			_context.Set<T>().RemoveRange(entities);
 		}
 
+		public void Update(T entity)
+		{
+			_context.Set<T>().Update(entity);
+		}
 		public void Attach(T entity)
 		{
 			_context.Set<T>().Attach(entity);

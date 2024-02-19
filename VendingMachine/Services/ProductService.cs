@@ -73,7 +73,11 @@ namespace VendingMachine.Services
 			Product? product = _unitOfWork.Product.Find(p => p.Id == productId);
 
 			if (product is not null)
-				ProductMapper.MapToProductDTO(product);
+			{
+			 ProductDTO? productDTO = ProductMapper.MapToProductDTO(product);
+				return productDTO;
+
+			}
 
 			return null;
 		}
@@ -128,12 +132,14 @@ namespace VendingMachine.Services
 			return product is not null ? ProductMapper.MapToProductDTO(product) : null;
 		}
 
-		public int Update(string sellerId, ProductDTO productDTO)
+		public int Update(ProductDTO productDTO)
 		{
-			if (productDTO == null || productDTO.SellerId != sellerId)
+			if (productDTO == null)
 				return -1;
 
-			_unitOfWork.Product.Attach(ProductMapper.MapToProduct(productDTO)!);
+			Product product = ProductMapper.MapToProduct(productDTO)!;
+			//_unitOfWork.Product.Attach(product);
+			_unitOfWork.Product.Update(product);
 			var numberOfRowsAffected = _unitOfWork.Complete();
 
 			return numberOfRowsAffected;

@@ -7,7 +7,9 @@ namespace VendingMachine.Interfaces
         T? Add(T entity);
         IEnumerable<T> AddRnge(IEnumerable<T> entities);
         void Attach(T entity);
-        void AttachRange(IEnumerable<T> entities);
+        void Update(T entity);
+
+		void AttachRange(IEnumerable<T> entities);
         int Count();
         int Count(Expression<Func<T, bool>> criteria);
         Task<int> CountAsync();

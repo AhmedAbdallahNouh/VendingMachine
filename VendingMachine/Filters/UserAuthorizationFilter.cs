@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace VendingMachine.Filters
 {
-	public class UserAuthorizationFilter
+	public class UserAuthorizationFilter : IAuthorizationFilter
 	{
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{

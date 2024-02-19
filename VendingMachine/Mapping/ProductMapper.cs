@@ -1,4 +1,5 @@
 ﻿using VendingMachine.DTOs;
+using VendingMachine.DTOs.ProductsDTOs;
 using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.Models;
 
@@ -26,6 +27,23 @@ namespace VendingMachine.Mapping
 			return null;
 			
 		}
+		public static ProductDTO? MapToAddProductDTO(AddProductDTO addProductDTO)
+		{
+			if (addProductDTO is not null)
+			{
+				ProductDTO ProductDTO = new ProductDTO()
+				{
+					Id = addProductDTO.Id,
+					Name = addProductDTO.Name,
+					AmountAvailable = addProductDTO.AmountAvailable,
+					Cost = addProductDTO.Cost,
+					SellerId = addProductDTO.SellerId,
+				};
+				return ProductDTO;
+			}
+			return null;
+
+		}
 		public static Product? MapToProduct(ProductDTO productDTO)
 		{
 			if (productDTO is not null)
@@ -37,9 +55,11 @@ namespace VendingMachine.Mapping
 					AmountAvailable = productDTO.AmountAvailable,
 					Cost = productDTO.Cost,
 					SellerId = productDTO.SellerId,
-					Seller = productDTO.SellerDTO is not null ? UserMapper.MapToUser(productDTO.SellerDTO) : null,
+					//Seller = productDTO.SellerDTO is not null ? UserMapper.MapToUser(productDTO.SellerDTO) : null,
 					//KeyDTOs = Product.Keys.Select(k => MapKeyToDto(k)).ToList()
 				};
+				if (productDTO.SellerDTO is not null)
+					Product.Seller = UserMapper.MapToUser(productDTO.SellerDTO);
 				return Product;
 			}
 			return null;

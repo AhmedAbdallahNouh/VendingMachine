@@ -23,6 +23,7 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpPost]
+
 		public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
 		{
 			LoginResultDTO loginResult = await _authenticationService.Login(loginDTO);

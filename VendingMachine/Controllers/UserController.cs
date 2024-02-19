@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VendingMachine.DTOs.UserDTOs;
 using VendingMachine.Filters;
 using VendingMachine.Interfaces;
-using VendingMachine.Mapping;
-using VendingMachine.Models;
+
 
 namespace VendingMachine.Controllers
 {
     [Route("api/[controller]")]
 	[ApiController]
+
 	public class UserController : ControllerBase
 	{
 		private readonly IUserService _userService;
@@ -22,6 +21,8 @@ namespace VendingMachine.Controllers
 		}
 
 		[HttpGet]
+		[Authorize(AuthenticationSchemes = "Bearer" , Roles ="Seller")]
+
 		public async Task<IActionResult> GetAll() 
 		{
 			List<IAppUserDTO> appUserDTOs =  await _userService.GetAll();
@@ -80,22 +81,22 @@ namespace VendingMachine.Controllers
 			return BadRequest();
 		}
 
-		[HttpPut]
-		[Authorize(Roles ="Seller")]
+	    [HttpPost("{userId:alpha}/{newPassword:alpha}")]
 		[TypeFilter(typeof(UserAuthorizationFilter))]
-		public async Task<ActionResult> Update(string userId,AppUserDTO userDTO, string newPassword)
-		{
-			if (ModelState.IsValid)
+			public async Task<ActionResult> Update([FromRoute] string userId,[FromBody] AppUserDTO userDTO,[FromRoute] string newPassword)
 			{
-				IdentityResult result = await _userService.UpdateUserAsync(userId, userDTO ,newPassword);
+				if (ModelState.IsValid)
+				{
+					IdentityResult result = await _userService.UpdateUserAsync(userId, userDTO ,newPassword);
 
-				if (!result.Succeeded)
-					return UnprocessableEntity("Unable to process the request to add the user.");
+					if (!result.Succeeded)
+						return UnprocessableEntity("Unable to process the request to add the user.");
 
-				return NoContent();
+					return NoContent();
+				}
+				return BadRequest();
 			}
-			return BadRequest();
-		}
+
 
 		[HttpDelete]
 		[TypeFilter(typeof(UserAuthorizationFilter))]

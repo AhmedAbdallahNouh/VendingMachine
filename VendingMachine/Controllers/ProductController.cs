@@ -152,15 +152,15 @@ namespace VendingMachine.Controllers
 		}
 
 
-		[Authorize(Roles ="Seller")]
+		[Authorize(AuthenticationSchemes = "Bearer", Roles = "Seller")]
 		[TypeFilter(typeof(SellerAuthorizationFilter))]
-		[HttpPut("Edit/{id:alpha}")]
-		public IActionResult Update(string sellerId,[FromBody] ProductDTO productDTO)
+		[HttpPut]
+		public IActionResult Update([FromBody] ProductDTO productDTO)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			int numberOfRowsAffected = _productServices.Update(sellerId,productDTO);
+			int numberOfRowsAffected = _productServices.Update(productDTO);
 
 			if (numberOfRowsAffected <= 0)
 				return UnprocessableEntity("Unable to process the request to add the product.");
